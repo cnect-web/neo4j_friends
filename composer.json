@@ -1,14 +1,14 @@
 {
-  "name": "drupal/neo4j_friends",
+  "name": "cnect-web/neo4j_friends",
   "type": "drupal-module",
   "description": "Neo4j Friends",
-  "keywords": ["Drupal"],
+  "keywords": ["Drupal", "Neo4j"],
   "license": "GPL-2.0+",
   "homepage": "https://www.drupal.org/project/neo4j_friends",
   "minimum-stability": "dev",
   "support": {
-    "issues": "https://www.drupal.org/project/issues/neo4j_friends",
-    "source": "http://cgit.drupalcode.org/neo4j_friends"
+    "issues": "https://github.com/cnect-web/neo4j_friends/issues",
+    "source": "https://github.com/cnect-web/neo4j_friends"
   },
   "require": { }
 }
