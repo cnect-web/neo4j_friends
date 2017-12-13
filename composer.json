@@ -1,0 +1,14 @@
+{
+  "name": "drupal/neo4j_friends",
+  "type": "drupal-module",
+  "description": "Neo4j Friends",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/neo4j_friends",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/neo4j_friends",
+    "source": "http://cgit.drupalcode.org/neo4j_friends"
+  },
+  "require": { }
+}

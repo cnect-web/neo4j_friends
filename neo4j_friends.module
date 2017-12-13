@@ -1,0 +1,58 @@
+<?php
+
+/**
+ * @file
+ * Contains neo4j_friends.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function neo4j_friends_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the neo4j_friends module.
+    case 'help.page.neo4j_friends':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Neo4j Friends') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+function _neo4j_friends_add_friend($uid1, $uid2) {
+  $query = "MATCH (u1:User {entity_id:\"{$uid1}\"}),
+  (u2:User {entity_id:\"{$uid2}\"})
+  CREATE UNIQUE (u1)-[:FRIEND {request:true}]->(u2)";
+  return $query;
+}
+
+function _neo4j_friends_pending_invites($uid) {
+  $query = "MATCH (n)-[rel:FRIEND {request:true}]->(n1)
+  WHERE n.entity_id = \"{$uid}\"
+  RETURN collect(n1)";
+  return $query;
+}
+
+function _neo4j_friends_pending_requests($uid) {
+  $query = "MATCH (n)<-[rel:FRIEND {request:true}]-(n1)
+  WHERE n.entity_id = \"{$uid}\"
+  RETURN collect(n1)";
+  return $query;
+}
+
+function _process_collection($result) {
+  $results = NULL;
+  if ($result->hasRecord()) {
+    $records = $result->records();
+    $records = array_pop($records);
+    if ($records->hasValues()) {
+      $results = $records->values();
+      $results = $results[0];
+    }
+  }
+  return $results;
+}

@@ -1,0 +1,7 @@
+name: Neo4j Friends
+type: module
+description: Neo4j Friends
+core: 8.x
+package: Neo4j
+dependencies:
+  - neo4j
