@@ -1,0 +1,10 @@
+uuid: cb85dd27-7276-4b26-9ced-b474cbe38b4e
+langcode: en
+status: true
+dependencies:
+  module:
+    - user
+id: user.picture_and_name
+label: 'Picture and Name'
+targetEntityType: user
+cache: true

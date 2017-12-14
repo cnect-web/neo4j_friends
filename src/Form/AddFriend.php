@@ -18,17 +18,26 @@ class AddFriend extends FormBase {
 
   public function buildForm(array $form, FormStateInterface $form_state) {
 
-    $form['messages'] = array(
-      '#markup' => '<div id="add-friend-result"></div>',
-    );
+    $form['control'] = [
+      '#title' => $this->t('+'),
+      '#type' => 'details',
+      '#tree' => TRUE,
+    ];
 
-    $form['search_user'] = [
+    $form['control']['messages'] = [
+      '#markup' => '<div id="add-friend-result"></div>',
+    ];
+
+    $form['control']['search_user'] = [
       '#title' => $this->t("Add Friend"),
       '#type' => 'entity_autocomplete',
       '#target_type' => 'user',
+      '#attributes' => [
+        'placeholder' => $this->t('Search user'),
+      ],
     ];
 
-    $form['search'] = [
+    $form['control']['search'] = [
       '#value' => $this->t("Add Friend"),
       '#type' => 'button',
       '#attributes' => [

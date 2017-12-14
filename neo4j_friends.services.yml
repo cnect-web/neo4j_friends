@@ -1,9 +1,0 @@
-services:
-  neo4j_friends.route_subscriber:
-    class: Drupal\neo4j_friends\Routing\AutocompleteRouteSubscriber
-    tags:
-      - { name: event_subscriber }
-
-  neo4j_friends.autocomplete_matcher:
-    class: Drupal\neo4j_friends\EntityAutocompleteMatcher
-    arguments: ['@plugin.manager.entity_reference_selection']

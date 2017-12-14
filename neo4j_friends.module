@@ -5,6 +5,9 @@
  * Contains neo4j_friends.module.
  */
 
+use Drupal\Component\Serialization\Json;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
@@ -23,10 +26,30 @@ function neo4j_friends_help($route_name, RouteMatchInterface $route_match) {
   }
 }
 
+/**
+ * Implements hook_entity_view_alter().
+ */
+function neo4j_friends_entity_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
+  // Hide the realname field label in compact mode.
+  if (isset($build['#user']) && $build['#view_mode'] == 'picture_and_name') {
+    if (isset($build['realname'])) {
+      $build['realname']['#label_display'] = 'hidden';
+    }
+  }
+}
+
 function _neo4j_friends_add_friend($uid1, $uid2) {
   $query = "MATCH (u1:User {entity_id:\"{$uid1}\"}),
   (u2:User {entity_id:\"{$uid2}\"})
-  CREATE UNIQUE (u1)-[:FRIEND {request:true}]->(u2)";
+  CREATE UNIQUE (u1)-[:FRIEND {request:true}]-(u2)";
+  return $query;
+}
+
+function _neo4j_friends_get_friends($uid) {
+  $query = "MATCH (n)-[rel:FRIEND]-(n1)
+  WHERE n.entity_id = \"{$uid}\"
+  AND NOT EXISTS(rel.request)
+  RETURN collect(n1)";
   return $query;
 }
 
@@ -41,6 +64,13 @@ function _neo4j_friends_pending_requests($uid) {
   $query = "MATCH (n)<-[rel:FRIEND {request:true}]-(n1)
   WHERE n.entity_id = \"{$uid}\"
   RETURN collect(n1)";
+  return $query;
+}
+
+function _neo4j_friends_accept_request($uid1, $uid2) {
+  $query = "MATCH (u1:User {entity_id:\"{$uid1}\"})-[rel:FRIEND]-
+  (u2:User {entity_id:\"{$uid2}\"})
+  REMOVE rel.request";
   return $query;
 }
 

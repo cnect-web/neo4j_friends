@@ -1,0 +1,7 @@
+user.friend_requests.confirm:
+  path: 'user/{user}/friends/requests/confirm/{target_uid}'
+  defaults:
+    _controller: 'Drupal\neo4j_friends\Controller\FriendRequestController::authorizedCallback'
+  requirements:
+    _csrf_token: 'TRUE'
+    user: '^[a-zA-Z0-9_]+'
