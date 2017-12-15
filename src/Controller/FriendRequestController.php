@@ -8,7 +8,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 class FriendRequestController {
 
-  // ...
   public function authorizedCallback(AccountInterface $user, Request $request) {
     $path = substr($request->getPathInfo(), 1);
     $path_args = explode('/', $path);

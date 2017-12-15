@@ -1,0 +1,4 @@
+user.friends_menu:
+  title: Friends
+  parent: entity.user.canonical
+  route_name: user.friends
