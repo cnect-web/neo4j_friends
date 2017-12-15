@@ -21,7 +21,7 @@ class AddFriend extends FormBase {
     $form['control'] = [
       '#title' => $this->t('+'),
       '#type' => 'details',
-      '#tree' => TRUE,
+      '#tree' => FALSE,
     ];
 
     $form['control']['messages'] = [
@@ -60,6 +60,7 @@ class AddFriend extends FormBase {
     $response = new AjaxResponse();
     // Check if User or email exists or not
     $current_uid = \Drupal::currentUser()->id();
+
     $friend_uid = $form_state->getValue('search_user');
 
     $client = \Drupal::service('neo4j.client');
