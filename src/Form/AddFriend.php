@@ -35,6 +35,9 @@ class AddFriend extends FormBase {
       '#attributes' => [
         'placeholder' => $this->t('Search user'),
       ],
+      '#selection_settings' => array(
+        'include_anonymous' => FALSE,
+      ),
     ];
 
     $form['control']['search'] = [
