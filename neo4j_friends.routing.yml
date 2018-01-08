@@ -5,7 +5,9 @@ user.friends:
     _controller: '\Drupal\neo4j_friends\Controller\FriendsPageController::friendsList'
   requirements:
     _permission: 'access content'
-    user: '^[a-zA-Z0-9_]+'
+  options:
+    user: \d+
+
 user.friends.requests:
   path: '/user/{user}/friends/requests'
   defaults:
@@ -13,7 +15,8 @@ user.friends.requests:
     _controller: '\Drupal\neo4j_friends\Controller\FriendsPageController::friendRequests'
   requirements:
     _permission: 'access content'
-    user: '^[a-zA-Z0-9_]+'
+    user: \d+
+
 user.friends.invites:
   path: '/user/{user}/friends/invites'
   defaults:
@@ -21,7 +24,8 @@ user.friends.invites:
     _controller: '\Drupal\neo4j_friends\Controller\FriendsPageController::friendInvites'
   requirements:
     _permission: 'access content'
-    user: '^[a-zA-Z0-9_]+'
+    user: \d+
+
 user.friend_requests.confirm:
   path: 'user/{user}/friends/requests/confirm/{target_uid}'
   defaults:
@@ -29,3 +33,4 @@ user.friend_requests.confirm:
   requirements:
     _csrf_token: 'TRUE'
     user: '^[a-zA-Z0-9_]+'
+    target_uid: '^[a-zA-Z0-9_]+'

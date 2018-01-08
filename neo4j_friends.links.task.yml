@@ -23,3 +23,21 @@ user.friends_tab:
   route_name : user.friends
   base_route: entity.user.canonical
   weight: 10
+user.friends_tab_default:
+  title: Friends
+  route_name : user.friends
+  base_route: entity.user.canonical
+  parent_id: user.friends_tab
+  weight: 10
+user.friend_requests_tab:
+  title: Friend Requests
+  route_name : user.friends.requests
+  base_route: entity.user.canonical
+  parent_id: user.friends_tab
+  weight: 20
+user.friend_invites_tab:
+  title: Friend Invites
+  route_name : user.friends.invites
+  base_route: entity.user.canonical
+  parent_id: user.friends_tab
+  weight: 30
