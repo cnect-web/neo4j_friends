@@ -29,7 +29,16 @@ user.friends.invites:
 user.friend_requests.confirm:
   path: 'user/{user}/friends/requests/confirm/{target_uid}'
   defaults:
-    _controller: 'Drupal\neo4j_friends\Controller\FriendRequestController::authorizedCallback'
+    _controller: 'Drupal\neo4j_friends\Controller\FriendRequestController::acceptRequest'
+  requirements:
+    _csrf_token: 'TRUE'
+    user: '^[a-zA-Z0-9_]+'
+    target_uid: '^[a-zA-Z0-9_]+'
+
+user.friend_requests.reject:
+  path: 'user/{user}/friends/requests/reject/{target_uid}'
+  defaults:
+    _controller: 'Drupal\neo4j_friends\Controller\FriendRequestController::rejectRequest'
   requirements:
     _csrf_token: 'TRUE'
     user: '^[a-zA-Z0-9_]+'

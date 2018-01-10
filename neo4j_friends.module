@@ -47,8 +47,8 @@ function neo4j_friends_entity_view_alter(array &$build, EntityInterface $entity,
  */
 function _neo4j_friends_add_friend($uid1, $uid2) {
   $query = (new Cypher())
-    ->match('u1', 'User', array('entity_id' => $uid1))
-    ->match('u2', 'User', array('entity_id' => $uid2))
+    ->match('u1', 'user', array('entity_id' => $uid1))
+    ->match('u2', 'user', array('entity_id' => $uid2))
     ->getQuery();
   $query .= " CREATE UNIQUE (u1)-[:FRIEND {request:1}]-(u2)";
   return $query;
@@ -118,8 +118,8 @@ function _neo4j_friends_pending_requests($uid) {
  */
 function _neo4j_friends_accept_request($uid1, $uid2) {
   $query = (new Cypher())
-    ->match('u1', 'User', array('entity_id' => $uid1))
-      ->relatedWith('u2', 'User', array('entity_id' => $uid2))
+    ->match('u1', 'user', array('entity_id' => $uid1))
+      ->relatedWith('u2', 'user', array('entity_id' => $uid2))
       ->by('r', 'FRIEND', array('request' => 1), '<-')
       ->getQuery();
   $query .= " REMOVE r.request";

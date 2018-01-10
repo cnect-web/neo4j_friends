@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class FriendRequestController {
 
-  public function authorizedCallback(AccountInterface $user, Request $request) {
+  public function acceptRequest(AccountInterface $user, Request $request) {
     $path = substr($request->getPathInfo(), 1);
     $path_args = explode('/', $path);
 
@@ -25,4 +25,23 @@ class FriendRequestController {
 
     return TRUE;
   }
+
+  public function rejectRequest(AccountInterface $user, Request $request) {
+    $path = substr($request->getPathInfo(), 1);
+    $path_args = explode('/', $path);
+
+    $op = $path_args[4];
+    $target_uid = $path_args[5];
+
+    switch ($op) {
+      case 'reject':
+        $client = \Drupal::service('neo4j.client');
+        $query = _neo4j_friends_accept_request($user->id(), $target_uid);
+        $result = $client->run($query);
+        break;
+    }
+
+    return TRUE;
+  }
+
 }

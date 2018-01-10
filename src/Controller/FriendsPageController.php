@@ -3,10 +3,17 @@
 namespace Drupal\neo4j_friends\Controller;
 
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\Request;
+use Drupal\Core\Render\Element\Table;
+use Drupal\Core\TypedData\Plugin\DataType\ItemList;
 
 class FriendsPageController {
+
+  /**
+   * List of friends.
+   */
   public function friendsList(AccountInterface $user, Request $request) {
 
     $current_uid = \Drupal::currentUser()->id();
@@ -21,13 +28,37 @@ class FriendsPageController {
         $entity_type = $result_node->get('entity_type');
         $entity_id = $result_node->get('entity_id');
         $user_entity = entity_load($entity_type, $entity_id);
-        $users[] = $view_builder->view($user_entity, "picture_and_name");
+        $user = $view_builder->view($user_entity, "picture_and_name");
+
+        $friends[] = array(
+          'pic_name' => render($user),
+        );
+
+        $count++;
       }
     }
 
-    $markup = empty($users)
-      ? t("No friends :'(")
-      : render($users);
+    $friends_table = array(
+      '#type' => 'table',
+    );
+    foreach ($friends as $k => $friend) {
+      $friends_table[$k]['pic_name'] = [
+        '#markup' => $friend['pic_name'],
+        '#wrapper_attributes' => [
+          'class' => ['pic-name'],
+        ],
+      ];
+      $friends_table[$k]['links'] = [
+        '#markup' => $friend['links'],
+        '#wrapper_attributes' => [
+          'class' => ['friend-links'],
+        ],
+      ];
+    }
+
+    $markup = empty($friends)
+      ? t("No friends.")
+      : render($friends_table);
 
     return [
       '#markup' => $markup,
@@ -35,6 +66,9 @@ class FriendsPageController {
     ];
   }
 
+  /**
+   * List of received requests.
+   */
   public function friendRequests(AccountInterface $user, Request $request) {
     $current_uid = \Drupal::currentUser()->id();
     $client = \Drupal::service('neo4j.client');
@@ -51,17 +85,49 @@ class FriendsPageController {
         $user_entity = entity_load($entity_type, $entity_id);
 
         $user = $view_builder->view($user_entity, "picture_and_name");
-        $links = $this->generateRequestLinks($entity_id);
-        $user['#suffix'] = implode($links);
+        $raw_links = $this->generateRequestLinks($entity_id, ['accept', 'reject']);
 
-        $users[] = $user;
+        $links = [
+          '#theme' => 'item_list',
+          '#list_type' => 'ul',
+          '#attributes' => [
+            'class' => [
+              'inline',
+            ],
+          ],
+          '#items' => $raw_links,
+        ];
+
+        $friends[] = array(
+          'pic_name' => render($user),
+          'links' => render($links),
+        );
+
         $count++;
       }
     }
 
-    $markup = empty($users)
+    $friends_table = array(
+      '#type' => 'table',
+    );
+    foreach ($friends as $k => $friend) {
+      $friends_table[$k]['pic_name'] = [
+        '#markup' => $friend['pic_name'],
+        '#wrapper_attributes' => [
+          'class' => ['pic-name'],
+        ],
+      ];
+      $friends_table[$k]['links'] = [
+        '#markup' => $friend['links'],
+        '#wrapper_attributes' => [
+          'class' => ['friend-links'],
+        ],
+      ];
+    }
+
+    $markup = empty($friends)
       ? t("No pending requests.")
-      : render($users);
+      : render($friends_table);
 
     return [
       '#title' => t('Friend Requests (@count)', array('@count' => $count)),
@@ -69,6 +135,9 @@ class FriendsPageController {
     ];
   }
 
+  /**
+   * List of sent requests.
+   */
   public function friendInvites(AccountInterface $user, Request $request) {
     $current_uid = \Drupal::currentUser()->id();
     $client = \Drupal::service('neo4j.client');
@@ -83,19 +152,42 @@ class FriendsPageController {
         $entity_type = $result_node->get('entity_type');
         $entity_id = $result_node->get('entity_id');
         $user_entity = entity_load($entity_type, $entity_id);
-        $users[] = $view_builder->view($user_entity, "picture_and_name");
+        $user = $view_builder->view($user_entity, "picture_and_name");
+
+        $friends[] = array(
+          'pic_name' => render($user),
+        );
+
         $count++;
       }
     }
 
-    $markup = empty($users)
+    $friends_table = array(
+      '#type' => 'table',
+    );
+    foreach ($friends as $k => $friend) {
+      $friends_table[$k]['pic_name'] = [
+        '#markup' => $friend['pic_name'],
+        '#wrapper_attributes' => [
+          'class' => ['pic-name'],
+        ],
+      ];
+      $friends_table[$k]['links'] = [
+        '#markup' => $friend['links'],
+        '#wrapper_attributes' => [
+          'class' => ['friend-links'],
+        ],
+      ];
+    }
+
+    $markup = empty($friends)
       ? t("No pending invites.")
-      : render($users);
+      : render($friends_table);
 
     $builtForm = \Drupal::formBuilder()->getForm('Drupal\neo4j_friends\Form\AddFriend');
 
     return [
-      '#title' => t('Friendship Requests Sent (@count)', array('@count' => $count)),
+      '#title' => t('Friendship Invites Sent (@count)', array('@count' => $count)),
       '#markup' => $markup,
       'form' => $builtForm,
     ];
@@ -104,7 +196,7 @@ class FriendsPageController {
   /**
    * {@inheritdoc}
    */
-  public function generateRequestLinks($entity_id) {
+  public function generateRequestLinks($entity_id, $links = []) {
 
     $current_uid = \Drupal::currentUser()->id();
 
@@ -112,12 +204,32 @@ class FriendsPageController {
     $token = \Drupal::csrfToken()->get($url->getInternalPath());
     $url->setOptions(['absolute' => TRUE, 'query' => ['token' => $token]]);
 
-    $accept_request = Link::fromTextAndUrl(t('Confirm'), $url);
-    $accept_request = $accept_request->toRenderable();
-    $accept_request['#attributes'] = ['class' => ['use-ajax']];
-    $links[] = render($accept_request);
+    if (in_array('accept', $links)) {
+      $accept_request = Link::fromTextAndUrl(t('Confirm'), $url);
+      $accept_request = $accept_request->toRenderable();
+      $accept_request['#attributes'] = [
+        'class' => [
+          'use-ajax',
+          'accept-request'
+        ]
+      ];
+      $return_links[] = render($accept_request);
+    }
 
-    return $links;
+    if (in_array('reject', $links)) {
+      $url = Url::fromRoute('user.friend_requests.reject', array('user' => $current_uid, 'target_uid' => $entity_id));
+      $reject_request = Link::fromTextAndUrl(t('Delete Request'), $url);
+      $reject_request = $reject_request->toRenderable();
+      $reject_request['#attributes'] = [
+        'class' => [
+          'use-ajax',
+          'reject-request'
+        ]
+      ];
+      $return_links[] = render($reject_request);
+    }
+
+    return $return_links;
   }
 
 }

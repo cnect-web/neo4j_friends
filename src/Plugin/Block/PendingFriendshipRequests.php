@@ -9,6 +9,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
+use Drupal\Core\Render\Element\Table;
 
 /**
  * Provides a block with a simple text.
@@ -68,7 +69,7 @@ class PendingFriendshipRequests extends BlockBase {
     $token = \Drupal::csrfToken()->get($url->getInternalPath());
     $url->setOptions(['absolute' => TRUE, 'query' => ['token' => $token]]);
 
-    $accept_request = Link::fromTextAndUrl(t('Confirm'), $url);
+    $accept_request = Link::fromTextAndUrl(t('Accept'), $url);
     $accept_request = $accept_request->toRenderable();
     $accept_request['#attributes'] = ['class' => ['use-ajax']];
     $links[] = render($accept_request);
