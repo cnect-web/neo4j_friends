@@ -132,8 +132,11 @@ function _neo4j_friends_accept_request($uid1, $uid2) {
  * @todo : move to neo4j main module?
  */
 function _process_collection($result) {
+  if (!$result) {
+    return NULL;
+  }
   $results = NULL;
-  if ($result->hasRecord()) {
+  if ($result && $result->hasRecord()) {
     $records = $result->records();
     $records = array_pop($records);
     if ($records->hasValues()) {

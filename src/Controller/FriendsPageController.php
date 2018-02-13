@@ -17,11 +17,16 @@ class FriendsPageController {
   public function friendsList(AccountInterface $user, Request $request) {
 
     $current_uid = \Drupal::currentUser()->id();
-    $client = \Drupal::service('neo4j.client');
     $query = _neo4j_friends_get_friends($current_uid);
-    $result = $client->run($query);
 
-    $users = [];
+    try {
+      $client = \Drupal::service('neo4j.client');
+      $result = $client->run($query);
+    }
+    catch (Exception $e) {
+      watchdog_exception('Neo4j Friends', $e);
+    }
+
     if ($results = _process_collection($result)) {
       $view_builder = \Drupal::entityTypeManager()->getViewBuilder('user');
       foreach($results as $result_node) {
@@ -40,7 +45,9 @@ class FriendsPageController {
 
     $friends_table = array(
       '#type' => 'table',
+      '#empty' => t("No Friends."),
     );
+
     foreach ($friends as $k => $friend) {
       $friends_table[$k]['pic_name'] = [
         '#markup' => $friend['pic_name'],
@@ -56,13 +63,8 @@ class FriendsPageController {
       ];
     }
 
-    $markup = empty($friends)
-      ? t("No friends.")
-      : render($friends_table);
-
     return [
-      '#markup' => $markup,
-      'form' => $builtForm,
+      '#markup' => render($friends_table)
     ];
   }
 
@@ -71,12 +73,17 @@ class FriendsPageController {
    */
   public function friendRequests(AccountInterface $user, Request $request) {
     $current_uid = \Drupal::currentUser()->id();
-    $client = \Drupal::service('neo4j.client');
     $query = _neo4j_friends_pending_requests($current_uid);
-    $result = $client->run($query);
+
+    try {
+      $client = \Drupal::service('neo4j.client');
+      $result = $client->run($query);
+    }
+    catch (Exception $e) {
+      watchdog_exception('Neo4j Friends', $e);
+    }
 
     $count = 0;
-    $users = [];
     if ($results = _process_collection($result)) {
       $view_builder = \Drupal::entityTypeManager()->getViewBuilder('user');
       foreach($results as $result_node) {
@@ -109,7 +116,9 @@ class FriendsPageController {
 
     $friends_table = array(
       '#type' => 'table',
+      '#empty' => t("No pending requests."),
     );
+
     foreach ($friends as $k => $friend) {
       $friends_table[$k]['pic_name'] = [
         '#markup' => $friend['pic_name'],
@@ -125,13 +134,9 @@ class FriendsPageController {
       ];
     }
 
-    $markup = empty($friends)
-      ? t("No pending requests.")
-      : render($friends_table);
-
     return [
       '#title' => t('Friend Requests (@count)', array('@count' => $count)),
-      '#markup' => $markup,
+      '#markup' => render($friends_table)
     ];
   }
 
@@ -140,12 +145,17 @@ class FriendsPageController {
    */
   public function friendInvites(AccountInterface $user, Request $request) {
     $current_uid = \Drupal::currentUser()->id();
-    $client = \Drupal::service('neo4j.client');
     $query = _neo4j_friends_pending_invites($current_uid);
-    $result = $client->run($query);
+
+    try {
+      $client = \Drupal::service('neo4j.client');
+      $result = $client->run($query);
+    }
+    catch (Exception $e) {
+      watchdog_exception('Neo4j Friends', $e);
+    }
 
     $count = 0;
-    $users = [];
     if ($results = _process_collection($result)) {
       $view_builder = \Drupal::entityTypeManager()->getViewBuilder('user');
       foreach($results as $result_node) {
@@ -164,7 +174,9 @@ class FriendsPageController {
 
     $friends_table = array(
       '#type' => 'table',
+      '#empty' => t("No pending invites."),
     );
+
     foreach ($friends as $k => $friend) {
       $friends_table[$k]['pic_name'] = [
         '#markup' => $friend['pic_name'],
@@ -180,15 +192,11 @@ class FriendsPageController {
       ];
     }
 
-    $markup = empty($friends)
-      ? t("No pending invites.")
-      : render($friends_table);
-
     $builtForm = \Drupal::formBuilder()->getForm('Drupal\neo4j_friends\Form\AddFriend');
 
     return [
       '#title' => t('Friendship Invites Sent (@count)', array('@count' => $count)),
-      '#markup' => $markup,
+      '#markup' => render($friends_table),
       'form' => $builtForm,
     ];
   }

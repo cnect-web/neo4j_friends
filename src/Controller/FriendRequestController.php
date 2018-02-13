@@ -19,7 +19,12 @@ class FriendRequestController {
       case 'confirm':
         $client = \Drupal::service('neo4j.client');
         $query = _neo4j_friends_accept_request($user->id(), $target_uid);
-        $result = $client->run($query);
+        try {
+          $client->run($query);
+        }
+        catch (Exception $e) {
+          watchdog_exception('Neo4j Friends', $e);
+        }
         break;
     }
 
@@ -37,6 +42,12 @@ class FriendRequestController {
       case 'reject':
         $client = \Drupal::service('neo4j.client');
         $query = _neo4j_friends_accept_request($user->id(), $target_uid);
+        try {
+          $client->run($query);
+        }
+        catch (Exception $e) {
+          watchdog_exception('Neo4j Friends', $e);
+        }
         $result = $client->run($query);
         break;
     }
